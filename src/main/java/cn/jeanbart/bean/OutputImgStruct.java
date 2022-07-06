@@ -9,7 +9,6 @@ import java.util.List;
  */
 @Data
 public class OutputImgStruct {
-    // TODO mid好像没卵用，看能不能删掉
     public int left,mid,right;
     public OutputImgStruct(int left, int mid, int right) {
         this.left = left;

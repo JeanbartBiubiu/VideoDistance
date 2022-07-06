@@ -3,6 +3,7 @@ package cn.jeanbart.bean;
 import cn.jeanbart.util.FfmpegVideoUtil;
 import com.sun.javafx.stage.WindowEventDispatcher;
 import lombok.Data;
+import lombok.ToString;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.File;
@@ -10,6 +11,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 @Data
+@ToString
 public class Video {
     private String filePath;//文件路径
     private int max;//文件所有帧
@@ -37,9 +39,9 @@ public class Video {
         videoUtil.setVideoPath(filePath);
         videoUtil.createFFmpegFG();
         //max = (int)Math.round((double)this.getLengthInTime() * this.getFrameRate() / 1000000.0D)
-        //避免算多跳不出循环，所以减2
-        max = videoUtil.getMax() - 2;
-        widthAndHeight = videoUtil.getWidthAndHeight();
+        max = videoUtil.getMax() - 1;
+        widthAndHeight[0] = videoUtil.getWidthAndHeight()[0];
+        widthAndHeight[1] = videoUtil.getWidthAndHeight()[1];
         frameRate = videoUtil.getFrameRate();
         videoUtil.destroyFFmpegFG();
         return true;
@@ -71,10 +73,10 @@ public class Video {
             errorMsg = "IO出错";
             return false;
         }
-        if (md51.equals(md52)) {
+        /*if (md51.equals(md52)) {
             errorMsg = "同一视频";
             return false;
-        }
+        }*/
         //长宽比不相同的
         if (widthAndHeight[0] * video2.widthAndHeight[1] != widthAndHeight[1] * video2.widthAndHeight[0]) {
             errorMsg = "长宽比不同，无法比较";
@@ -85,6 +87,22 @@ public class Video {
             errorMsg = "帧率不同";
             return false;
         }
+
+        //大的分辨率向小的降
+        if (widthAndHeight[0] != video2.getWidthAndHeight()[0]) {
+            if (widthAndHeight[0] > video2.getWidthAndHeight()[0]) {
+                this.setScale(true);
+                this.getScaleWidthAndHeight()[0] = video2.getWidthAndHeight()[0];
+                this.getScaleWidthAndHeight()[1] = video2.getWidthAndHeight()[1];
+            } else {
+                video2.setScale(true);
+                video2.getScaleWidthAndHeight()[0] = this.getWidthAndHeight()[0];
+                video2.getScaleWidthAndHeight()[1] = this.getWidthAndHeight()[1];
+            }
+            this.setWidthAndHeight(this.getScaleWidthAndHeight());
+            video2.setWidthAndHeight(video2.getScaleWidthAndHeight());
+        }
+
         return true;
     }
 }

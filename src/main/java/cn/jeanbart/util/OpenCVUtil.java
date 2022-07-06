@@ -65,6 +65,8 @@ public class OpenCVUtil {
             //long estimatedTime = System.currentTimeMillis() - startTime;
             //System.out.println("花费时间= " + estimatedTime + "ms");
         } catch (Exception e) {
+            System.out.println("src="+src);
+            System.out.println("des="+des);
             System.out.println("出错:" + e);
             return false;
         }

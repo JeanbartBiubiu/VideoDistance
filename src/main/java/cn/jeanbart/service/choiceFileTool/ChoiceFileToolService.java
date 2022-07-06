@@ -31,17 +31,33 @@ public class ChoiceFileToolService {
         for (Map<String, String> fileInfoTableDatum : controller.getFileInfoTableData()) {
             if ("true".equals(fileInfoTableDatum.get("status"))) {
                 String filePath1 = fileInfoTableDatum.get("filesPath");
+                int y1;
+                int y2;
+                try {
+                    y1 = Integer.getInteger(fileInfoTableDatum.getOrDefault("y1", "0"));
+                    y2 = Integer.getInteger(fileInfoTableDatum.getOrDefault("y2", "100"));
+                } catch (Exception e) {
+                    y1 = 0;
+                    y2 = 100;
+                }
+                y1 = y1 + y1 % 5;
+                y2 = y2 + y2 % 5;
                 File file1 = new File(filePath1);
                 File file2 = new File(file1.getParent() + "/1/" + file1.getName());
-                System.out.println(file1.getPath());
-                System.out.println(file2.getPath());
                 Video video1 = new Video(file1.getPath());
                 if (video1.init()) {
                     video1.setErrorMsg("视频不存在");
                 }
                 Video video2 = new Video(file2.getPath());
                 video2.init();
+                video1.setY1(video1.getWidthAndHeight()[1] * y1 / 100);
+                video1.setY2(video1.getWidthAndHeight()[1] * y2 / 100);
+                video2.setY1(video2.getWidthAndHeight()[1] * y1 / 100);
+                video2.setY2(video2.getWidthAndHeight()[1] * y2 / 100);
                 if (video1.equals(video2)) {
+                    System.out.println(video1);
+                    System.out.println(video2);
+                    System.out.println("-------------");
                     VideoCompareService videoCompareService = new VideoCompareService(video1, video2, (int) video1.getFrameRate());
                     List<List<OutputImgStruct>> lists;
                     new Thread(
@@ -61,7 +77,7 @@ public class ChoiceFileToolService {
                             }
                     );
                     lists = videoCompareService.startCompare();
-                    if(lists == null){
+                    if (lists == null) {
                         return;
                     }
                     if (lists.size() == 0) {
@@ -71,8 +87,8 @@ public class ChoiceFileToolService {
                     }
 
                 } else {
-                        fileInfoTableDatum.put("errorInfo", video1.getErrorMsg());
-                        controller.getFileInfoTableView().refresh();
+                    fileInfoTableDatum.put("errorInfo", video1.getErrorMsg());
+                    controller.getFileInfoTableView().refresh();
                 }
             }
         }
